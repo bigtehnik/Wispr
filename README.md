@@ -1,6 +1,13 @@
 
 voice_input.py
+```
+# Скачать последнюю версию Python 3.x
+Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe" -OutFile "$env:TEMP\python-installer.exe"
 
+# Установить Python с добавлением в PATH и установкой pip
+Start-Process "$env:TEMP\python-installer.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_pip=1" -Wait
+
+```
 
 ```
 python -m pip install sounddevice numpy scipy faster_whisper pynput keyboard
