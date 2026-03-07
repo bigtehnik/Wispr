@@ -1,3 +1,30 @@
+для боковой  клавиши мыши
+скачиваем 
+https://github.com/AutoHotkey/AutoHotkey/releases/download/v2.0.21/AutoHotkey_2.0.21_setup.exe
+
+запускаем скрипт
+```
+#Requires AutoHotkey v2.0
+
+; Первая боковая кнопка (XButton1)
+XButton1::
+{
+    Send "{F24 down}"
+    KeyWait "XButton1"
+    Send "{F24 up}"
+}
+
+; Если хочешь вторую боковую кнопку — раскомментируй:
+; XButton2::
+; {
+;     Send "{F23 down}"
+;     KeyWait "XButton2"
+;     Send "{F23 up}"
+; }
+
+```
+
+запускаем основнйо скрипт
 ```
 cd C:\voice; python .\voice_input.py
 
@@ -35,10 +62,10 @@ CHANNELS = 1
 
 # Звуки через winsound
 def play_sound_start():
-    winsound.Beep(440, 100)  # 440 Hz, 100 мс
+    winsound.Beep(440, 100)  # старт
 
 def play_sound_end():
-    winsound.Beep(880, 100)  # 880 Hz, 100 мс
+    winsound.Beep(880, 100)  # стоп
 
 # Загрузка модели
 print("Загрузка модели...")
@@ -48,6 +75,7 @@ print("Модель загружена")
 # Глобальные переменные
 recording = False
 audio_buffer = []
+pressed_keys = set()
 
 def record_audio():
     """Фоновая запись аудио пока удерживается клавиша"""
@@ -63,6 +91,7 @@ def process_audio():
     global audio_buffer
     if not audio_buffer:
         return
+
     audio_data = np.concatenate(audio_buffer, axis=0)
     audio_int16 = (audio_data * 32767).astype(np.int16)
 
@@ -75,41 +104,58 @@ def process_audio():
     text_result = " ".join(segment.text for segment in segments)
     print("Результат:", text_result)
 
-    # Вставка текста в курсор
     kb.write(text_result)
-    print("Текст вставлен в курсор")
+    print("Текст вставлен")
 
-    # Проигрываем звук завершения
     play_sound_end()
 
-# Слежение за нажатиями клавиш
-pressed_keys = set()
-
+# -----------------------------
+# Обработчики клавиш
+# -----------------------------
 def key_press(key):
     global recording
     pressed_keys.add(key)
-    try:
-        if keyboard.Key.ctrl_l in pressed_keys and keyboard.Key.shift in pressed_keys and not recording:
+
+    # Вариант 1: Ctrl + Shift
+    if keyboard.Key.ctrl_l in pressed_keys and keyboard.Key.shift in pressed_keys:
+        if not recording:
             recording = True
             threading.Thread(target=record_audio, daemon=True).start()
             play_sound_start()
             print("Говорите...")
-    except AttributeError:
-        pass
+
+    # Вариант 2: боковая кнопка мыши → F24
+    if key == keyboard.Key.f24:
+        if not recording:
+            recording = True
+            threading.Thread(target=record_audio, daemon=True).start()
+            play_sound_start()
+            print("Говорите...")
 
 def key_release(key):
     global recording
+
     if key in pressed_keys:
         pressed_keys.remove(key)
-    # Останавливаем запись и обрабатываем аудио
+
+    # Остановка записи для Ctrl+Shift
     if recording and (key == keyboard.Key.ctrl_l or key == keyboard.Key.shift):
         recording = False
         print("Запись завершена")
         threading.Thread(target=process_audio, daemon=True).start()
 
-# Запуск слушателя клавиатуры
+    # Остановка записи для боковой кнопки (F24)
+    if recording and key == keyboard.Key.f24:
+        recording = False
+        print("Запись завершена")
+        threading.Thread(target=process_audio, daemon=True).start()
+
+# -----------------------------
+# Запуск слушателя
+# -----------------------------
 with keyboard.Listener(on_press=key_press, on_release=key_release) as listener:
-    print("Нажмите Левый Ctrl + Левый Shift, чтобы говорить...")
+    print("Готово: удерживайте Ctrl+Shift или боковую кнопку мыши для записи")
     listener.join()
+
 
 ```
