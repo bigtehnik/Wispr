@@ -69,7 +69,7 @@ def play_sound_end():
 
 # Загрузка модели
 print("Загрузка модели...")
-model = WhisperModel("base", device="cpu", compute_type="float32")
+model = WhisperModel("small", device="cpu", compute_type="float32")
 print("Модель загружена")
 
 # Глобальные переменные
