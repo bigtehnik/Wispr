@@ -1,5 +1,9 @@
+```
+cd C:\voice; python .\voice_input.py
 
-voice_input.py
+
+```
+
 ```
 # Скачать последнюю версию Python 3.x
 Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe" -OutFile "$env:TEMP\python-installer.exe"
